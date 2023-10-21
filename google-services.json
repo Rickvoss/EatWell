@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "255969282670",
+    "project_id": "eatwell-6c0d8",
+    "storage_bucket": "eatwell-6c0d8.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:255969282670:android:0f1718514d9e7d0e17f47f",
+        "android_client_info": {
+          "package_name": "eatwell.com"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDND-q1lRvpbbRtJ7zNDqxVFFkyTpOoU-o"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
