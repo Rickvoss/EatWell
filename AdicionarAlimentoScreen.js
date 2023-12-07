@@ -1,82 +1,78 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, Button, StyleSheet } from 'react-native';
+import { db } from './firebase';
 
 const ListaAlimentosScreen = () => {
   const [alimentos, setAlimentos] = useState([]);
+  const [nome, setNome] = useState('');
+  const [calorias, setCalorias] = useState('');
+  const [descricao, setDescricao] = useState('');
+  const [alimentoAdicionado, setAlimentoAdicionado] = useState(false);
 
-  const AdicionarAlimentoScreen = () => {
-    const [nome, setNome] = useState('');
-    const [calorias, setCalorias] = useState('');
-
-    const handleAdicionarAlimentoPress = () => {
-      const novoAlimento = {
-        nome: nome,
-        calorias: parseInt(calorias),
-      };
-      setAlimentos([...alimentos, novoAlimento]);
-      setNome(''); // Limpa o campo de nome após adicionar o alimento
-      setCalorias(''); // Limpa o campo de calorias após adicionar o alimento
+  const handleAdicionarAlimentoPress = () => {
+    const novoAlimento = {
+      name: nome,
+      caloria: calorias,
+      descricao: descricao,
     };
 
-    return (
-      <View>
-        <Text>Nome:</Text>
-        <TextInput
-          style={styles.input}
-          value={nome}
-          onChangeText={setNome}
-        />
-        <Text>Calorias:</Text>
-        <TextInput
-          style={styles.input}
-          keyboardType="numeric"
-          value={calorias}
-          onChangeText={setCalorias}
-        />
-        <Button title="Adicionar Alimento" onPress={handleAdicionarAlimentoPress} />
-      </View>
-    );
+    db.collection('alimentos')
+      .add(novoAlimento)
+      .then((docRef) => {
+        setAlimentos([...alimentos, { ...novoAlimento, id: docRef.id }]);
+        setNome('');
+        setCalorias('');
+        setDescricao('');
+        setAlimentoAdicionado(true); // Define como true para exibir a mensagem
+        // Define um tempo para limpar a mensagem de sucesso após 3 segundos
+        setTimeout(() => {
+          setAlimentoAdicionado(false);
+        }, 3000);
+      })
+      .catch((error) => {
+        console.error('Erro ao adicionar alimento: ', error);
+      });
   };
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Lista de Alimentos</Text>
-      <AdicionarAlimentoScreen />
-      <Text style={styles.subtitle}>Alimentos adicionados:</Text>
-      {alimentos.map((alimento, index) => (
-        <Text key={index} style={styles.alimento}>
-          {alimento.nome} - {alimento.calorias} calorias
-        </Text>
-      ))}
+    <View>
+      <Text>Nome:</Text>
+      <TextInput
+        style={styles.input}
+        value={nome}
+        onChangeText={setNome}
+      />
+      <Text>Calorias:</Text>
+      <TextInput
+        style={styles.input}
+        keyboardType="numeric"
+        value={calorias}
+        onChangeText={setCalorias}
+      />
+      <Text>Descrição:</Text>
+      <TextInput
+        style={styles.input}
+        value={descricao}
+        onChangeText={setDescricao}
+      />
+      <Button title="Adicionar Alimento" onPress={handleAdicionarAlimentoPress} />
+      {alimentoAdicionado && (
+        <Text style={styles.mensagemSucesso}>Alimento adicionado com sucesso!</Text>
+      )}
     </View>
   );
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    padding: 16,
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    marginBottom: 16,
-  },
-  subtitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    marginTop: 16,
-    marginBottom: 8,
-  },
-  alimento: {
-    fontSize: 16,
-    marginBottom: 4,
-  },
   input: {
     borderWidth: 1,
     borderColor: '#ccc',
     marginBottom: 16,
     padding: 8,
+  },
+  mensagemSucesso: {
+    color: 'green',
+    marginTop: 10,
   },
 });
 

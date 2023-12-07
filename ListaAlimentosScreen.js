@@ -1,23 +1,41 @@
-import React, { useState } from 'react';
-import { View, Text, TextInput, FlatList, StyleSheet, Button, TouchableOpacity } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Text, TextInput, FlatList, StyleSheet, Button, TouchableOpacity, Image } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import db from './firebase';
+import { db } from './firebase';
 
-const ListaAlimentosScreen = () => {
+
+  const ListaAlimentosScreen = () => {
   const [searchText, setSearchText] = useState('');
-  const [alimentos, setAlimentos] = useState([
-    { id: 1, name: 'Pão', caloria: 100 },
-    { id: 2, name: 'Hamburger', caloria: 200 },
-    { id: 3, name: 'Alface', caloria: 300 },
-    // Adicione mais alimentos aqui...
-  ]);
+  const [alimentos, setAlimentos] = useState([]);
   const [searchedAlimentos, setSearchedAlimentos] = useState([]);
   const navigation = useNavigation();
+
+  useEffect(() => {
+    const fetchAlimentos = async () => {
+      try {
+        const alimentosData = [];
+        if (db) {
+          const snapshot = await db.collection('alimentos').get();
+          snapshot.forEach((doc) => {
+            alimentosData.push({ id: doc.id, ...doc.data() });
+          });
+          setAlimentos(alimentosData);
+        }
+      } catch (error) {
+        console.error('Erro ao buscar alimentos: ', error);
+      }
+    };
+
+    const unsubscribe = navigation.addListener('focus', () => {
+      fetchAlimentos();
+    });
+
+    return unsubscribe;
+  }, [navigation]);
 
   const handleSearch = (text) => {
     setSearchText(text);
 
-    // Filtrar a lista de alimentos com base no texto de pesquisa
     const filteredAlimentos = alimentos.filter((alimento) =>
       alimento.name.toLowerCase().includes(text.toLowerCase())
     );
@@ -29,27 +47,28 @@ const ListaAlimentosScreen = () => {
     navigation.navigate('AdicionarAlimentoScreen');
   };
 
-  const handleAdicionarAlimento = (nomeAlimento, caloriasAlimento) => {
-    const newAlimento = {
-      id: alimentos.length + 1,
-      name: nomeAlimento,
-      caloria: caloriasAlimento,
-    };
-    setAlimentos([...alimentos, newAlimento]);
-  };
-
   const handleItemPress = (alimento) => {
     navigation.navigate('DescricaoAlimentoScreen', { alimento });
   };
 
   const renderItem = ({ item }) => (
     <TouchableOpacity style={styles.item} onPress={() => handleItemPress(item)}>
-      <Text>{item.name}</Text>
-    </TouchableOpacity>
-  );
+    <View style={styles.itemContent}>
+      <View style={styles.imagemContainer}>
+        <Image
+          style={styles.imagemAlimento}
+          source={{ uri: item.img }}
+        />
+      </View>
+      <Text style={[styles.nomeAlimento, { textAlign: 'center' }]}>{item.name}</Text>
+    </View>
+  </TouchableOpacity>
+);
 
   return (
-    <View style={styles.container}>
+    <View style={{ flex: 1, backgroundColor: '#55934F' }}>
+      <View style={styles.container}>
+      <Text style={styles.title}>Alimentos</Text>
       <TextInput
         style={styles.searchInput}
         placeholder="Pesquisar alimentos..."
@@ -62,29 +81,87 @@ const ListaAlimentosScreen = () => {
         keyExtractor={(item) => item.id.toString()}
         numColumns={3}
       />
-      <Button title="Adicionar Alimento" onPress={handleAdicionarAlimentoPress} />
+    </View>
     </View>
   );
 };
 
 const styles = StyleSheet.create({
+  
   container: {
     flex: 1,
+    marginTop: 55,
+    borderRadius: 50, 
+    borderBottomLeftRadius: 0,
+    borderBottomRightRadius: 0,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 55,
+  },
+  header: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    height: 30,
+  },
+  headerText: {
+    fontSize: 24,
+    fontWeight: 'bold',
+  },
+  title: {
+    fontSize: 25,
+    fontWeight: 'bold',
+    textAlign: 'center',
+    marginTop: 20,
+    marginBottom: 20,
+    color: '#55934F',
   },
   searchInput: {
     height: 40,
     margin: 10,
     paddingHorizontal: 10,
     borderWidth: 1,
-    borderColor: '#ccc',
-  },
+    borderColor: '#55934F',
+    borderRadius: 25,},
   item: {
     flex: 1,
     margin: 10,
     padding: 10,
-    backgroundColor: '#f0f0f0',
+    width: 100, // Largura fixa para garantir o mesmo tamanho
+    height: 115, // Altura fixa para garantir o mesmo tamanho
+    borderRadius: 15,
+    borderWidth: 1,
+    borderColor: '#55934F',
+    backgroundColor: '#F2FFF0',
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  itemContent: {
+    flexDirection: 'column',
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: '#2E2E2E',
+  },
+  imagemContainer: {
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 5, // Ajuste conforme necessário para espaçamento entre a imagem e o texto
+  },
+  imagemAlimento: {
+    width: 50, // Defina o tamanho da imagem conforme necessário
+    height: 50, // Defina o tamanho da imagem conforme necessário
+    borderRadius: 25, // Para deixar a imagem redonda, se preferir
+  },
+  textContainer: {
+    justifyContent: 'flex-end',
+    alignItems: 'center',
+    color: '#55934F',
+  },
+  nomeAlimento: {
+    marginTop: 10,
+    color: '#55934F',
+    fontWeight: 'bold',
+  },  
+  flatlistContent: {
+    paddingBottom: 80, // Adapte conforme necessário para acomodar o botão
   },
 });
 
