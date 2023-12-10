@@ -1,13 +1,11 @@
 {
   "cli": {
-    "version": ">= 5.4.0"
+    "version": ">= 0.52.0"
   },
   "build": {
     "development": {
-      "distribution": "internal",
-      "ios": {
-        "buildConfiguration": "Debug"
-      }
+      "developmentClient": true,
+      "distribution": "internal"
     },
     "preview": {
       "distribution": "internal"

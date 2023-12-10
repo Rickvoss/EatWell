@@ -1,11 +1,19 @@
 import React from 'react';
-import { View, Text, StyleSheet, Image } from 'react-native';
+import { View, Text, StyleSheet, Image, TouchableOpacity  } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
+
+
 
 const DescricaoAlimentoScreen = ({ route }) => {
   const { alimento } = route.params;
+  const navigation = useNavigation();
 
   return (
     <View style={styles.container}>
+      <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
+        <MaterialCommunityIcons name="arrow-left-bold-circle-outline" size={35} color="white" />
+      </TouchableOpacity>
       <View style={styles.imageContainer}>
         <View style={styles.imageWrapper}>
           <Image
@@ -67,6 +75,23 @@ const styles = StyleSheet.create({
   },
   caloriesText: {
     marginLeft: 10,
+    fontWeight: 'bold',
+  },
+  backButton: {
+    position: 'absolute',
+    top: 20,
+    left: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
+    zIndex: 1,
+    width: 55,
+    height: 55,
+    backgroundColor: '#2B7023',
+    borderRadius: 55,
+  },
+  backButtonText: {
+    color: 'white',
+    fontSize: 18,
     fontWeight: 'bold',
   },
 });
